@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package notification.v1;
+
+option go_package = "github.com/syalsr/notification/pkg/v1;api";
+
+service NotificationService {
+    rpc SendEmail(SendEmailRequest) returns(SendEMailResponse) {}
+}
+
+message SendEmailRequest {
+    repeated InfoRequest emails =  1;
+}
+
+message InfoRequest {
+    string email = 1;
+    string name = 2;
+}
+
+message SendEMailResponse {
+    string status = 1;
+}
