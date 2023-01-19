@@ -2,7 +2,6 @@ package emailer
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/mailgun/mailgun-go/v4"
@@ -26,7 +25,7 @@ func NewEmailer(cfg *config.App) Interface {
 func (e *Emailer) SendPersonalizedEmail(emails []model.PersonalizedEmail) error {
 	for _, item := range emails {
 		message := e.Mg.NewMessage(e.Sender, item.Subject, item.Detail.Text, item.Email)
-		
+
 		for _, item := range item.Detail.Attachment {
 			message.AddBufferAttachment(item.Name, item.Content)
 		}

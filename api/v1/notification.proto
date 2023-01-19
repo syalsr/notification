@@ -18,9 +18,8 @@ message SendPersonalizedEmailRequest {
 
 message InfoPersonalizedRequest {
     string email = 1;
-    string name = 2;
-    string subject =  3;
-    DetailEmail detail = 4;
+    string subject = 2;
+    DetailEmail detail = 3;
 }
 
 message DetailEmail {
@@ -34,14 +33,9 @@ message Attachament {
 }
 
 message SendCommonEmailRequest {
-    repeated InfoCommonRequest emails = 1;
-    DetailEmail detail = 2;
-}
-
-message InfoCommonRequest {
-    string email = 1;
-    string name = 2;
-    string subject =  3;
+    repeated string emails = 1;
+    string subject =  2;
+    DetailEmail detail = 3;
 }
 
 message SendEmailResponse {

@@ -23,19 +23,23 @@ func NewNotificator(cfg *config.App, n usecase.Interface) *Notificator {
 func (n *Notificator) SendPersonalizedEmail(ctx context.Context, req *api.SendPersonalizedEmailRequest) (*api.SendEmailResponse, error) {
 	emails := make([]model.PersonalizedEmail, len(req.Emails))
 	for _, idx := range req.Emails {
+		attachament := make([]model.Attachment, len(idx.Detail.Attachment))
+		for _, item := range idx.Detail.Attachment {
+			attachament = append(attachament, model.Attachment{Name: item.Name, Content: item.Content})
+		}
+
 		emails = append(
 			emails,
 			model.PersonalizedEmail{
-				Name:    idx.Name,
 				Email:   idx.Email,
 				Subject: idx.Subject,
 				Detail: model.DetailEmail{
 					Text:       idx.Detail.Text,
-					Attachment: idx.Detail.Attachment,
+					Attachment: attachament,
 				},
 			})
 	}
-	err := n.Notificator.SendPersonalizedEmail(emails)
+	err := n.notif.SendPersonalizedEmail(emails)
 	if err != nil {
 		return &api.SendEmailResponse{Status: err.Error()}, err
 	}
@@ -43,17 +47,14 @@ func (n *Notificator) SendPersonalizedEmail(ctx context.Context, req *api.SendPe
 }
 
 func (n *Notificator) SendCommonEmail(ctx context.Context, req *api.SendCommonEmailRequest) (*api.SendEmailResponse, error) {
-	emails := make([]model.InfoCommonRequest, len(req.Emails))
-	for _, item := range req.Emails {
-		emails = append(emails, model.InfoCommonRequest{
-			Email: item.Email, 
-			Name: item.Name, 
-			Subject: item.Subject,
-		})
+	attachment := make([]model.Attachment, len(req.Detail.Attachment))
+	for _, item := range req.Detail.Attachment {
+		attachment = append(attachment, model.Attachment{Name: item.Name, Content: item.Content})
 	}
-	err := n.Notificator.SendCommonEmail(&model.CommonEmail{
-		Emails: emails,
-		Detail: model.DetailEmail{Text: req.Detail.Text, Attachment: req.Detail.Attachment},
+	err := n.notif.SendCommonEmail(&model.CommonEmail{
+		Emails: req.Emails,
+		Subject: req.Subject,
+		Detail: model.DetailEmail{Text: req.Detail.Text, Attachment: attachment},
 	})
 	if err != nil {
 		return &api.SendEmailResponse{Status: err.Error()}, err
