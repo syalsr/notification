@@ -9,6 +9,8 @@ import (
 
 	"github.com/syalsr/notification/internal/app/service"
 	"github.com/syalsr/notification/internal/config"
+	"github.com/syalsr/notification/internal/usecase"
+	"github.com/syalsr/notification/internal/usecase/emailer"
 	api "github.com/syalsr/notification/pkg/v1"
 
 	"github.com/rs/zerolog/log"
@@ -28,7 +30,12 @@ func Run(ctx context.Context, cfg *config.App) error {
 	server := grpc.NewServer()
 
 	log.Info().Msg("Register gRPC server")
-	api.RegisterNotificationServiceServer(server, service.NewNotificator(cfg))
+
+	emailer := emailer.NewEmailer()
+	notif := usecase.NewNotificator(emailer)
+	service := service.NewNotificator(cfg, notif)
+
+	api.RegisterNotificationServiceServer(server, service)
 	go func() {
 		log.Info().Msgf("Start gRPC server on %s", cfg.GrpcAddr)
 		if err = server.Serve(listener); err != nil {

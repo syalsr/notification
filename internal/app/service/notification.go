@@ -11,12 +11,12 @@ import (
 
 type Notificator struct {
 	api.UnimplementedNotificationServiceServer
-	usecase.Notificator
+	notif usecase.Interface
 }
 
-func NewNotificator(cfg *config.App, notif usecase.Notificator) *Notificator {
+func NewNotificator(cfg *config.App, n usecase.Interface) *Notificator {
 	return &Notificator{
-		Notificator: notif,
+		notif: n,
 	}
 }
 
@@ -39,13 +39,17 @@ func (n *Notificator) SendPersonalizedEmail(ctx context.Context, req *api.SendPe
 	if err != nil {
 		return &api.SendEmailResponse{Status: err.Error()}, err
 	}
-	return nil, nil
+	return &api.SendEmailResponse{Status: "OK"}, nil
 }
 
 func (n *Notificator) SendCommonEmail(ctx context.Context, req *api.SendCommonEmailRequest) (*api.SendEmailResponse, error) {
 	emails := make([]model.InfoCommonRequest, len(req.Emails))
 	for _, item := range req.Emails {
-		emails = append(emails, model.InfoCommonRequest{Email: item.Email, Name: item.Name, Subject: item.Subject})
+		emails = append(emails, model.InfoCommonRequest{
+			Email: item.Email, 
+			Name: item.Name, 
+			Subject: item.Subject,
+		})
 	}
 	err := n.Notificator.SendCommonEmail(&model.CommonEmail{
 		Emails: emails,
@@ -54,5 +58,5 @@ func (n *Notificator) SendCommonEmail(ctx context.Context, req *api.SendCommonEm
 	if err != nil {
 		return &api.SendEmailResponse{Status: err.Error()}, err
 	}
-	return nil, nil
+	return &api.SendEmailResponse{Status: "OK"}, nil
 }
