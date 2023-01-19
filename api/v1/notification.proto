@@ -5,18 +5,40 @@ package notification.v1;
 option go_package = "github.com/syalsr/notification/pkg/v1;api";
 
 service NotificationService {
-    rpc SendEmail(SendEmailRequest) returns(SendEMailResponse) {}
+    // send email with personal information e.g. - name, id, phone etc.
+    rpc SendPersonalizedEmail(SendPersonalizedEmailRequest) returns(SendEmailResponse) {}
+    
+    // send email with common text
+    rpc SendCommonEmail(SendCommonEmailRequest) returns (SendEmailResponse) {}
 }
 
-message SendEmailRequest {
-    repeated InfoRequest emails =  1;
+message SendPersonalizedEmailRequest {
+    repeated InfoPersonalizedRequest emails =  1;
 }
 
-message InfoRequest {
+message InfoPersonalizedRequest {
     string email = 1;
     string name = 2;
+    string subject =  3;
+    DetailEmail detail = 4;
 }
 
-message SendEMailResponse {
+message DetailEmail {
+    string text = 1;
+    repeated bytes attachment = 2;
+}
+
+message SendCommonEmailRequest {
+    repeated InfoCommonRequest emails = 1;
+    DetailEmail detail = 2;
+}
+
+message InfoCommonRequest {
+    string email = 1;
+    string name = 2;
+    string subject =  3;
+}
+
+message SendEmailResponse {
     string status = 1;
 }

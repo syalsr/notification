@@ -22,7 +22,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NotificationServiceClient interface {
-	SendEmail(ctx context.Context, in *SendEmailRequest, opts ...grpc.CallOption) (*SendEMailResponse, error)
+	// send email with personal information e.g. - name, id, phone etc.
+	SendPersonalizedEmail(ctx context.Context, in *SendPersonalizedEmailRequest, opts ...grpc.CallOption) (*SendEmailResponse, error)
+	// send email with common text
+	SendCommonEmail(ctx context.Context, in *SendCommonEmailRequest, opts ...grpc.CallOption) (*SendEmailResponse, error)
 }
 
 type notificationServiceClient struct {
@@ -33,9 +36,18 @@ func NewNotificationServiceClient(cc grpc.ClientConnInterface) NotificationServi
 	return &notificationServiceClient{cc}
 }
 
-func (c *notificationServiceClient) SendEmail(ctx context.Context, in *SendEmailRequest, opts ...grpc.CallOption) (*SendEMailResponse, error) {
-	out := new(SendEMailResponse)
-	err := c.cc.Invoke(ctx, "/notification.v1.NotificationService/SendEmail", in, out, opts...)
+func (c *notificationServiceClient) SendPersonalizedEmail(ctx context.Context, in *SendPersonalizedEmailRequest, opts ...grpc.CallOption) (*SendEmailResponse, error) {
+	out := new(SendEmailResponse)
+	err := c.cc.Invoke(ctx, "/notification.v1.NotificationService/SendPersonalizedEmail", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) SendCommonEmail(ctx context.Context, in *SendCommonEmailRequest, opts ...grpc.CallOption) (*SendEmailResponse, error) {
+	out := new(SendEmailResponse)
+	err := c.cc.Invoke(ctx, "/notification.v1.NotificationService/SendCommonEmail", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +58,10 @@ func (c *notificationServiceClient) SendEmail(ctx context.Context, in *SendEmail
 // All implementations must embed UnimplementedNotificationServiceServer
 // for forward compatibility
 type NotificationServiceServer interface {
-	SendEmail(context.Context, *SendEmailRequest) (*SendEMailResponse, error)
+	// send email with personal information e.g. - name, id, phone etc.
+	SendPersonalizedEmail(context.Context, *SendPersonalizedEmailRequest) (*SendEmailResponse, error)
+	// send email with common text
+	SendCommonEmail(context.Context, *SendCommonEmailRequest) (*SendEmailResponse, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -54,8 +69,11 @@ type NotificationServiceServer interface {
 type UnimplementedNotificationServiceServer struct {
 }
 
-func (UnimplementedNotificationServiceServer) SendEmail(context.Context, *SendEmailRequest) (*SendEMailResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendEmail not implemented")
+func (UnimplementedNotificationServiceServer) SendPersonalizedEmail(context.Context, *SendPersonalizedEmailRequest) (*SendEmailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendPersonalizedEmail not implemented")
+}
+func (UnimplementedNotificationServiceServer) SendCommonEmail(context.Context, *SendCommonEmailRequest) (*SendEmailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendCommonEmail not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 
@@ -70,20 +88,38 @@ func RegisterNotificationServiceServer(s grpc.ServiceRegistrar, srv Notification
 	s.RegisterService(&NotificationService_ServiceDesc, srv)
 }
 
-func _NotificationService_SendEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SendEmailRequest)
+func _NotificationService_SendPersonalizedEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendPersonalizedEmailRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NotificationServiceServer).SendEmail(ctx, in)
+		return srv.(NotificationServiceServer).SendPersonalizedEmail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/notification.v1.NotificationService/SendEmail",
+		FullMethod: "/notification.v1.NotificationService/SendPersonalizedEmail",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationServiceServer).SendEmail(ctx, req.(*SendEmailRequest))
+		return srv.(NotificationServiceServer).SendPersonalizedEmail(ctx, req.(*SendPersonalizedEmailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NotificationService_SendCommonEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendCommonEmailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).SendCommonEmail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/notification.v1.NotificationService/SendCommonEmail",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).SendCommonEmail(ctx, req.(*SendCommonEmailRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -96,8 +132,12 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*NotificationServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SendEmail",
-			Handler:    _NotificationService_SendEmail_Handler,
+			MethodName: "SendPersonalizedEmail",
+			Handler:    _NotificationService_SendPersonalizedEmail_Handler,
+		},
+		{
+			MethodName: "SendCommonEmail",
+			Handler:    _NotificationService_SendCommonEmail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

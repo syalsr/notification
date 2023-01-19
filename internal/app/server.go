@@ -7,13 +7,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/syalsr/notification/pkg/v1"
-
-	"github.com/rs/zerolog/log"
 	"github.com/syalsr/notification/internal/app/service"
 	"github.com/syalsr/notification/internal/config"
+	api "github.com/syalsr/notification/pkg/v1"
+
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 func Run(ctx context.Context, cfg *config.App) error {
