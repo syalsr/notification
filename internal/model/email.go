@@ -8,17 +8,17 @@ type PersonalizedEmail struct {
 }
 
 type CommonEmail struct {
-	Emails []InfoCommonRequest
-	Detail DetailEmail
-}
-
-type InfoCommonRequest struct {
-	Email   string
-	Name    string
 	Subject string
+	Emails []string
+	Detail DetailEmail
 }
 
 type DetailEmail struct {
 	Text       string
-	Attachment [][]byte
+	Attachment []Attachment
+}
+
+type Attachment struct {
+	Name string
+	Content []byte
 }

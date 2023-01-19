@@ -31,10 +31,10 @@ func Run(ctx context.Context, cfg *config.App) error {
 
 	log.Info().Msg("Register gRPC server")
 
-	emailer := emailer.NewEmailer()
+	emailer := emailer.NewEmailer(cfg)
 	notif := usecase.NewNotificator(emailer)
 	service := service.NewNotificator(cfg, notif)
-
+	
 	api.RegisterNotificationServiceServer(server, service)
 	go func() {
 		log.Info().Msgf("Start gRPC server on %s", cfg.GrpcAddr)

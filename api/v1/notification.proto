@@ -25,7 +25,12 @@ message InfoPersonalizedRequest {
 
 message DetailEmail {
     string text = 1;
-    repeated bytes attachment = 2;
+    repeated Attachament attachment = 2;
+}
+
+message Attachament {
+    string name = 1;
+    bytes content = 2;
 }
 
 message SendCommonEmailRequest {
