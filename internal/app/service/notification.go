@@ -9,6 +9,7 @@ import (
 	api "github.com/syalsr/notification/pkg/v1"
 )
 
+
 type Notificator struct {
 	api.UnimplementedNotificationServiceServer
 	notif usecase.Interface

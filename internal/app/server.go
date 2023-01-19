@@ -17,6 +17,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+type canceler func()
+
 func Run(ctx context.Context, cfg *config.App) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -31,6 +33,7 @@ func Run(ctx context.Context, cfg *config.App) error {
 
 	log.Info().Msg("Register gRPC server")
 
+	canceler := make([]canceler, 0)
 	emailer := emailer.NewEmailer(cfg)
 	notif := usecase.NewNotificator(emailer)
 	service := service.NewNotificator(cfg, notif)
@@ -43,12 +46,12 @@ func Run(ctx context.Context, cfg *config.App) error {
 		}
 	}()
 
-	gracefulShutDown(server, cancel)
+	gracefulShutDown(server, cancel, canceler)
 
 	return nil
 }
 
-func gracefulShutDown(s *grpc.Server, cancel context.CancelFunc) {
+func gracefulShutDown(s *grpc.Server, cancel context.CancelFunc, canceler []canceler) {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
 	defer signal.Stop(ch)
@@ -56,6 +59,9 @@ func gracefulShutDown(s *grpc.Server, cancel context.CancelFunc) {
 	c := <-ch
 	log.Info().Msgf("Called graceful shutdown: %v", c)
 
+	for _, item := range canceler {
+		item()
+	}
 	s.GracefulStop()
 	cancel()
 }
