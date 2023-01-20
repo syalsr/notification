@@ -18,7 +18,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-type canceler func()
+type canceler func() error
 
 // Run - run grpc server
 func Run(ctx context.Context, cfg *config.App) error {
@@ -35,7 +35,6 @@ func Run(ctx context.Context, cfg *config.App) error {
 
 	log.Info().Msg("Register gRPC server")
 
-	canceler := make([]canceler, 0)
 	email := emailer.NewEmailer(cfg)
 	notif := usecase.NewNotificator(email)
 	serviceNotificator := service.NewNotificator(cfg, notif)
@@ -48,15 +47,15 @@ func Run(ctx context.Context, cfg *config.App) error {
 		}
 	}()
 
-	go func() {
-		log.Info().Msgf("Start kafka consumer on %s", cfg.KafkaURL)
-		client, err := kafka.NewConsumer(cfg)
-		if err != nil {
-			log.Err(err).Msgf("cant create new consumer: %w", err)
-		}
-		client.Run(ctxCancel)
-	}()
+	client, err := kafka.NewConsumer(cfg)
+	if err != nil {
+		log.Err(err).Msgf("cant create new consumer: %w", err)
+	}
+	log.Info().Msgf("Start kafka consumer on %s", cfg.KafkaURL)
 
+	go client.Run(ctxCancel)
+
+	canceler := []canceler{client.Close}
 	gracefulShutDown(server, cancel, canceler)
 
 	return nil
@@ -71,7 +70,10 @@ func gracefulShutDown(s *grpc.Server, cancel context.CancelFunc, canceler []canc
 	log.Info().Msgf("Called graceful shutdown: %v", c)
 
 	for _, item := range canceler {
-		item()
+		err := item()
+		if err != nil {
+			log.Err(err).Msgf("cant close %w", err)
+		}
 	}
 	s.GracefulStop()
 	cancel()

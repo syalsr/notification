@@ -34,6 +34,7 @@ func (c *Client) Run(ctx context.Context) {
 		log.Err(err).Msgf("cant create cosumer partition: %w", err)
 		return
 	}
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -44,4 +45,8 @@ func (c *Client) Run(ctx context.Context) {
 			continue
 		}
 	}
+}
+
+func (c *Client) Close() error {
+	return c.consumer.Close()
 }
