@@ -19,6 +19,7 @@ import (
 
 type canceler func()
 
+// Run - run grpc server
 func Run(ctx context.Context, cfg *config.App) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -34,11 +35,11 @@ func Run(ctx context.Context, cfg *config.App) error {
 	log.Info().Msg("Register gRPC server")
 
 	canceler := make([]canceler, 0)
-	emailer := emailer.NewEmailer(cfg)
-	notif := usecase.NewNotificator(emailer)
-	service := service.NewNotificator(cfg, notif)
-	
-	api.RegisterNotificationServiceServer(server, service)
+	email := emailer.NewEmailer(cfg)
+	notif := usecase.NewNotificator(email)
+	serviceNotificator := service.NewNotificator(cfg, notif)
+
+	api.RegisterNotificationServiceServer(server, serviceNotificator)
 	go func() {
 		log.Info().Msgf("Start gRPC server on %s", cfg.GrpcAddr)
 		if err = server.Serve(listener); err != nil {

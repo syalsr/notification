@@ -9,18 +9,20 @@ import (
 	api "github.com/syalsr/notification/pkg/v1"
 )
 
-
+// Notificator - notificator service
 type Notificator struct {
 	api.UnimplementedNotificationServiceServer
 	notif usecase.Interface
 }
 
+// NewNotificator - create new obj which implement Interface Notificator
 func NewNotificator(cfg *config.App, n usecase.Interface) *Notificator {
 	return &Notificator{
 		notif: n,
 	}
 }
 
+// SendPersonalizedEmail - send personalized email
 func (n *Notificator) SendPersonalizedEmail(ctx context.Context, req *api.SendPersonalizedEmailRequest) (*api.SendEmailResponse, error) {
 	emails := make([]model.PersonalizedEmail, len(req.Emails))
 	for _, idx := range req.Emails {
@@ -47,6 +49,7 @@ func (n *Notificator) SendPersonalizedEmail(ctx context.Context, req *api.SendPe
 	return &api.SendEmailResponse{Status: "OK"}, nil
 }
 
+// SendCommonEmail - send common email
 func (n *Notificator) SendCommonEmail(ctx context.Context, req *api.SendCommonEmailRequest) (*api.SendEmailResponse, error) {
 	attachment := make([]model.Attachment, len(req.Detail.Attachment))
 	for _, item := range req.Detail.Attachment {

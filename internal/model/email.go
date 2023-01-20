@@ -1,5 +1,6 @@
 package model
 
+// PersonalizedEmail - request
 type PersonalizedEmail struct {
 	Email   string
 	Name    string
@@ -7,17 +8,20 @@ type PersonalizedEmail struct {
 	Detail  DetailEmail
 }
 
+// CommonEmail - request
 type CommonEmail struct {
 	Subject string
 	Emails []string
 	Detail DetailEmail
 }
 
+// DetailEmail - detail
 type DetailEmail struct {
 	Text       string
 	Attachment []Attachment
 }
 
+// Attachment - detail
 type Attachment struct {
 	Name string
 	Content []byte

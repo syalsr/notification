@@ -2,6 +2,7 @@ package emailer
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/mailgun/mailgun-go/v4"
@@ -10,11 +11,13 @@ import (
 	"github.com/syalsr/notification/internal/model"
 )
 
+// Emailer - obj which implement emailer interface
 type Emailer struct {
 	Mg     mailgun.Mailgun
 	Sender string
 }
 
+// NewEmailer - create obj which implement interface
 func NewEmailer(cfg *config.App) Interface {
 	return &Emailer{
 		Mg:     mailgun.NewMailgun(cfg.MailGunDomain, cfg.MailGunPrivateKey),
@@ -22,6 +25,7 @@ func NewEmailer(cfg *config.App) Interface {
 	}
 }
 
+// SendPersonalizedEmail - send personalized email with mail gun
 func (e *Emailer) SendPersonalizedEmail(emails []model.PersonalizedEmail) error {
 	for _, item := range emails {
 		message := e.Mg.NewMessage(e.Sender, item.Subject, item.Detail.Text, item.Email)
@@ -44,6 +48,7 @@ func (e *Emailer) SendPersonalizedEmail(emails []model.PersonalizedEmail) error 
 	return nil
 }
 
+// SendCommonEmail - send common email with mail gun
 func (e *Emailer) SendCommonEmail(emails *model.CommonEmail) error {
 	message := e.Mg.NewMessage(e.Sender, emails.Subject, emails.Detail.Text, emails.Emails...)
 
@@ -57,7 +62,7 @@ func (e *Emailer) SendCommonEmail(emails *model.CommonEmail) error {
 	resp, id, err := e.Mg.Send(ctx, message)
 	if err != nil {
 		log.Err(err).Msgf("cant send email")
-		return err
+		return fmt.Errorf("cant send email: %w", err)
 	}
 	log.Info().Msgf("email was send - ID: %s, Resp: %s", id, resp)
 	return nil
