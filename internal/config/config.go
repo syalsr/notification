@@ -6,4 +6,8 @@ type App struct {
 	MailGunDomain     string `env:"MAILGUN_DOMAIN,required"`
 	MailGunPrivateKey string `env:"MAILGUN_PRIVATEKEY,required"`
 	MailGunName       string `env:"MAILGUN_NAME,required"`
+	KafkaURL          []string
+	KafkaParition     int32
+	KafkaOffset       int64
+	KafkaTopic        string
 }

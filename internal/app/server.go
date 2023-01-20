@@ -9,6 +9,7 @@ import (
 
 	"github.com/syalsr/notification/internal/app/service"
 	"github.com/syalsr/notification/internal/config"
+	"github.com/syalsr/notification/internal/kafka"
 	"github.com/syalsr/notification/internal/usecase"
 	"github.com/syalsr/notification/internal/usecase/emailer"
 	api "github.com/syalsr/notification/pkg/v1"
@@ -21,7 +22,7 @@ type canceler func()
 
 // Run - run grpc server
 func Run(ctx context.Context, cfg *config.App) error {
-	ctx, cancel := context.WithCancel(ctx)
+	ctxCancel, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	listener, err := net.Listen("tcp", cfg.GrpcAddr)
@@ -45,6 +46,15 @@ func Run(ctx context.Context, cfg *config.App) error {
 		if err = server.Serve(listener); err != nil {
 			log.Fatal().Msgf("cant start gRPC server: %w", err)
 		}
+	}()
+
+	go func() {
+		log.Info().Msgf("Start kafka consumer on %s", cfg.KafkaURL)
+		client, err := kafka.NewConsumer(cfg)
+		if err != nil {
+			log.Err(err).Msgf("cant create new consumer: %w", err)
+		}
+		client.Run(ctxCancel)
 	}()
 
 	gracefulShutDown(server, cancel, canceler)

@@ -35,9 +35,9 @@ func (e *Emailer) SendPersonalizedEmail(emails []model.PersonalizedEmail) error 
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-		defer cancel()
 
 		resp, id, err := e.Mg.Send(ctx, message)
+		cancel()
 
 		if err != nil {
 			log.Err(err).Msgf("cant send email")
