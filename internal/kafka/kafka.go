@@ -73,6 +73,7 @@ func (c *Client) CreateTopic(topic string, partition int32, offset int64) (saram
 	return pCons, nil
 }
 
+// Close - close connection to consumer
 func (c *Client) Close() error {
 	return c.consumer.Close()
 }

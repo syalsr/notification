@@ -42,7 +42,8 @@ func (n *Notificator) SendCommonEmail(emails *model.CommonEmail) error {
 	return nil
 }
 
-func (n *Notificator) Run(ctx context.Context, commonEmail <-chan string, personEmail <-chan string) {
+// Run - read email from common, person chan and send them with SendCommonEmail and SendPersonalizedEmail
+func (n *Notificator) Run(ctx context.Context, commonEmail, personEmail <-chan string) {
 	for {
 		select{
 		case <- ctx.Done():
