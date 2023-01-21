@@ -53,7 +53,10 @@ func Run(ctx context.Context, cfg *config.App) error {
 	}
 	log.Info().Msgf("Start kafka consumer on %s", cfg.KafkaURL)
 
-	go client.Run(ctxCancel)
+	commonEmail := make(chan string)
+	personEmail := make(chan string)
+	go client.Run(ctxCancel, commonEmail, personEmail)
+	go notif.Run(ctxCancel, commonEmail, personEmail)
 
 	canceler := []canceler{client.Close}
 	gracefulShutDown(server, cancel, canceler)
