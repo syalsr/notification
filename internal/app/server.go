@@ -51,7 +51,7 @@ func Run(ctx context.Context, cfg *config.App) error {
 	if err != nil {
 		log.Err(err).Msgf("cant create new consumer: %w", err)
 	}
-	log.Info().Msgf("Start kafka consumer on %s", cfg.KafkaURL)
+	log.Info().Msgf("Start kafka consumer on %s", cfg.Kafka.Dsn)
 
 	commonEmail := make(chan string)
 	personEmail := make(chan string)
