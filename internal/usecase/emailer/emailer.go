@@ -20,8 +20,8 @@ type Emailer struct {
 // NewEmailer - create obj which implement interface
 func NewEmailer(cfg *config.App) Interface {
 	return &Emailer{
-		Mg:     mailgun.NewMailgun(cfg.MailGunDomain, cfg.MailGunPrivateKey),
-		Sender: cfg.MailGunName,
+		Mg:     mailgun.NewMailgun(cfg.MailGun.Domain, cfg.MailGun.PrivateKey),
+		Sender: cfg.MailGun.Name,
 	}
 }
 
